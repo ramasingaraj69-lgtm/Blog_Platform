@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    
     'rest_framework',
     'corsheaders',
     'accounts',
@@ -44,7 +45,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
-
+CORS_ALLOWED_ORIGINS = [
+    "https://blog-platform-swart-gamma.vercel.app",
+]
+CORS_ALLOW_CREDENTIALS = True
+ALLOWED_HOSTS = [
+    "blog-platform-zrph.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 MIDDLEWARE = [
 
     "whitenoise.middleware.WhiteNoiseMiddleware",
