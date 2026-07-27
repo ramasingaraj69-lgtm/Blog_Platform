@@ -1,9 +1,13 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from config.mongodb import db
+from django.conf import settings
 import bcrypt
+import jwt
+import datetime
 
 users = db["users"]
+
 
 @api_view(["POST"])
 def register_user(request):
@@ -22,7 +26,7 @@ def register_user(request):
 
             "error": "Email already exists"
 
-        })
+        }, status=400)
 
     hashed_password = bcrypt.hashpw(
 
@@ -48,7 +52,7 @@ def register_user(request):
         "message": "User registered successfully"
 
     })
-from rest_framework_simplejwt.tokens import RefreshToken
+
 
 @api_view(["POST"])
 def login_user(request):
@@ -67,7 +71,7 @@ def login_user(request):
 
             "error": "Invalid email"
 
-        })
+        }, status=400)
 
     valid_password = bcrypt.checkpw(
 
@@ -83,20 +87,39 @@ def login_user(request):
 
             "error": "Invalid password"
 
-        })
+        }, status=400)
 
-    refresh = RefreshToken.for_user(request.user)
+    payload = {
+
+        "username": user["username"],
+
+        "email": user["email"],
+
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(days=1)
+
+    }
+
+    access_token = jwt.encode(
+
+        payload,
+
+        settings.SECRET_KEY,
+
+        algorithm="HS256"
+
+    )
 
     return Response({
 
         "message": "Login successful",
 
-        "access": str(refresh.access_token),
-
-        "refresh": str(refresh),
+        "access": access_token,
 
         "username": user["username"],
+
     })
+
+
 @api_view(["GET"])
 def get_profile(request, username):
 
@@ -112,7 +135,7 @@ def get_profile(request, username):
 
             "error": "User not found"
 
-        })
+        }, status=404)
 
     user["_id"] = str(user["_id"])
 
